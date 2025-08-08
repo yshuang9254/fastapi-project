@@ -1,0 +1,10 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# 忽略 venv 資料夾
+venv/
+
+# 其他常見忽略
+__pycache__/
+*.pyc
+
+# 不要忽略 .gitignore 自己
+!.gitignore
