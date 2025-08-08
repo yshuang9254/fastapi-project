@@ -1,14 +1,12 @@
 from fastapi import FastAPI,Response,status,HTTPException,Depends
 from fastapi.params import Body
-from random import randrange
 import psycopg2 # greSQL 資料庫驅動程式
 from psycopg2.extras import RealDictCursor # 查詢結果會變成字典（dict），而不是Tuple
 import time
 from sqlalchemy.orm import Session
-from . import models,schemas
+from . import models,schemas,utils
 from .database import engine,get_db
 from typing import List
-
 
 
 # 建立資料庫表格（若表格不存在）
@@ -91,11 +89,15 @@ def update_post(id:int,post:schemas.PostCreate,db:Session = Depends(get_db)):
     db.commit()
     return post_query.first()
 
-"""新增使用者"""
-@app.post("/createuser",status_code = status.HTTP_201_CREATED)
+"""新增使用者，對密碼加密"""
+@app.post("/createuser",status_code = status.HTTP_201_CREATED,response_model = schemas.UserOut)
 def create_user(user:schemas.UserCreate,db:Session = Depends(get_db)):
+    hashed_pwd = utils.hash(user.password)
+    user.password = hashed_pwd
     new_user = models.User(**user.model_dump())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
+
+

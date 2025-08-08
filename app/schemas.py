@@ -15,5 +15,12 @@ class Post(PostBase):
         orm_mode = True # 讓 Pydantic 能從 ORM 模型中讀取資料
 
 class UserCreate(BaseModel):
-    email:EmailStr # EmailStr 自動驗證格式是不是email，email 則不做格式檢查
+    email:EmailStr # EmailStr 自動驗證格式是不是email
     password:str
+
+class UserOut(BaseModel):
+    id:int
+    email:EmailStr
+    created_at:datetime
+    class Config:
+        orm_mode = True
