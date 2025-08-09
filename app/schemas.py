@@ -12,7 +12,7 @@ class PostCreate(PostBase):
 class Post(PostBase):
     created_at:datetime # 繼承 PostBase 的欄位，新增貼文建立時間
     class Config:
-        orm_mode = True # 讓 Pydantic 能從 ORM 模型中讀取資料
+        from_attributes = True # 讓 Pydantic 能從 ORM 模型中讀取資料
 
 class UserCreate(BaseModel):
     email:EmailStr # EmailStr 自動驗證格式是不是email
@@ -23,4 +23,4 @@ class UserOut(BaseModel):
     email:EmailStr
     created_at:datetime
     class Config:
-        orm_mode = True
+        from_attributes = True

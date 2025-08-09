@@ -6,7 +6,8 @@ import time
 from sqlalchemy.orm import Session
 from . import models,schemas,utils
 from .database import engine,get_db
-from typing import List
+from .routers import post,user
+
 
 
 # 建立資料庫表格（若表格不存在）
@@ -28,84 +29,16 @@ for i in range(5):
         time.sleep(3) # 暫停三秒，之後會繼續迴圈重試連接。
 
 
+app.include_router(post.router)
+app.include_router(user.router)
+
 @app.get("/")
 def root(): 
     return {"message":"Hello world!"}
 
 
-"""取得所有貼文"""
-@app.get("/posts",response_model = List[schemas.Post]) 
-def get_posts(db:Session = Depends(get_db)):
-    posts = db.query(models.Post).all() 
-    return posts
 
-"""新增貼文"""
-@app.post("/createposts",status_code = status.HTTP_201_CREATED,response_model = schemas.Post)
-def create_posts(post:schemas.PostCreate,db:Session = Depends(get_db)):  
-    new_post = models.Post(**post.model_dump()) 
-    db.add(new_post) 
-    db.commit() 
-    db.refresh(new_post) 
-    return new_post 
 
-"""取得最新一則貼文"""
-@app.get("/posts/latest",response_model = schemas.Post) 
-def get_latest_post(db:Session = Depends(get_db)):
-    post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
-    if not post: 
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
-                            detail = "沒有最新貼文") 
-    return post
 
-"""根據ID取得貼文"""
-@app.get("/posts/{id}",response_model = schemas.Post)
-def get_post(id: int,db:Session = Depends(get_db)): 
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    if not post: 
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
-                            detail = f"Post with id: {id} was not found.") 
-    return post
-
-"""刪除指定ID的貼文"""
-@app.delete("/posts/{id}",status_code=status.HTTP_204_NO_CONTENT) 
-def delete_post(id:int,db:Session = Depends(get_db)):
-    post_query = db.query(models.Post).filter(models.Post.id == id) 
-
-    if post_query.first() is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail = f"Post with id: {id} is  not exist.")
-    post_query.delete(synchronize_session = False)
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT) 
-
-"""更新指定ID的貼文"""
-@app.put("/posts/{id}",response_model = schemas.Post)
-def update_post(id:int,post:schemas.PostCreate,db:Session = Depends(get_db)):
-    post_query = db.query(models.Post).filter(models.Post.id == id)
-    if post_query.first() is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail = f"Post with id: {id} is  not exist.")
-    post_query.update(post.model_dump(),synchronize_session = False) 
-    db.commit()
-    return post_query.first()
-
-"""新增使用者，對密碼加密"""
-@app.post("/createuser",status_code = status.HTTP_201_CREATED,response_model = schemas.UserOut)
-def create_user(user:schemas.UserCreate,db:Session = Depends(get_db)):
-    hashed_pwd = utils.hash(user.password)
-    user.password = hashed_pwd
-    new_user = models.User(**user.model_dump())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
-
-@app.get("/user/{id}",response_model = schemas.UserOut)
-def get_user(id:int,db:Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == id).first()
-    if not user:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
-                            detail = f"User with id:{id} does not exist.")
-    return user
 
 
