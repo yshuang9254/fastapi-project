@@ -3,11 +3,15 @@ from ..database import get_db
 from sqlalchemy.orm import Session
 from .. import models,schemas,utils
 
-router = APIRouter()
+router = APIRouter(prefix = "/users",tags = ["users"])
 
 """新增使用者，對密碼加密"""
-@router.post("/createuser",status_code = status.HTTP_201_CREATED,response_model = schemas.UserOut)
+@router.post("/",status_code = status.HTTP_201_CREATED,response_model = schemas.UserOut)
 def create_user(user:schemas.UserCreate,db:Session = Depends(get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail="Email already registered.")
     hashed_pwd = utils.hash(user.password)
     user.password = hashed_pwd
     new_user = models.User(**user.model_dump())
@@ -17,7 +21,7 @@ def create_user(user:schemas.UserCreate,db:Session = Depends(get_db)):
     return new_user
 
 """取得指定id使用者資料"""
-@router.get("/user/{id}",response_model = schemas.UserOut)
+@router.get("/{id}",response_model = schemas.UserOut)
 def get_user(id:int,db:Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:

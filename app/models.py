@@ -1,5 +1,6 @@
 from .database import Base
-from sqlalchemy import Column,Integer,String,Boolean
+from sqlalchemy import Column,Integer,String,Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 
@@ -10,6 +11,9 @@ class Post(Base):
     content = Column(String,nullable = False)
     published = Column(Boolean,server_default = "True",nullable = False) # 資料庫自帶預設值 True
     created_at = Column(TIMESTAMP(timezone = True),nullable = False,server_default = text("now()")) # text()會建立TextClause 物件，讓SQLAlchemy知道這是 SQL 語句，不是純字串。
+    owner_id = Column(Integer,ForeignKey("users.id",ondelete = "CASCADE"),nullable = False)
+    owner = relationship("User")
+
 
 class User(Base):
     __tablename__ = "users"
