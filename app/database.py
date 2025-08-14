@@ -1,9 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from .config import settings
+
 
 # PostgreSQL 資料庫連線
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:712140@localhost/fastapi"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL) 
 # 建立 Session 類別，用來與資料庫互動
 Sessionlocal = sessionmaker(autocommit = False,autoflush = False,bind = engine)
@@ -17,3 +19,17 @@ def get_db():
         yield db 
     finally: 
         db.close()
+
+"""
+# 資料庫連線重試機制：純 psycopg2 → 需要自己手動連線、重試、管理 cursor
+for i in range(5):
+    try:
+        conn = psycopg2.connect(host = "localhost",database = "fastapi",user = "postgres"
+                                ,password = "712140",cursor_factory = RealDictCursor) # conn（連線物件）只代表跟資料庫的連線，但它不能直接執行查詢
+        cursor = conn.cursor() # cursor（游標）是執行 SQL 查詢的工具
+        print("資料庫連接成功!")
+        break
+    except Exception as error:
+        print("資料庫連接失敗!\n","Error:",error)
+        time.sleep(3) # 暫停三秒，之後會繼續迴圈重試連接。
+"""

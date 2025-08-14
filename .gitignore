@@ -1,8 +1,7 @@
 # Created by venv; see https://docs.python.org/3/library/venv.html
-# 忽略 venv 資料夾
+# 忽略
 venv/
-
-# 其他常見忽略
+.env
 __pycache__/
 *.pyc
 

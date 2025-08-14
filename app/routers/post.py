@@ -1,15 +1,29 @@
 from fastapi import FastAPI,Response,status,HTTPException,Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy import case,or_,and_
+from typing import List,Optional
 from .. import models,schemas,oauth2
 
 router = APIRouter(prefix = "/posts",tags = ["posts"])
 
 """取得所有貼文"""
 @router.get("/",response_model = List[schemas.Post]) 
-def get_posts(db:Session = Depends(get_db),current_user:models.User = Depends(oauth2.get_current_user)):
-    posts = db.query(models.Post).all() 
+def get_posts(db:Session = Depends(get_db),current_user:models.User = Depends(oauth2.get_current_user),
+              limit:int = 100,skip:int = 0,search:Optional[str] = ""):
+    query = db.query(models.Post)
+    title_match = models.Post.title.contains(search)
+    content_match = models.Post.content.contains(search)
+
+    if search:
+        contains =  or_(title_match, content_match)
+        sort = case((and_(title_match, content_match), 1),(title_match, 2),(content_match, 3),else_=4)
+        query = query.filter(contains).order_by(sort,models.Post.created_at.desc())
+    else:
+        query = query.order_by(models.Post.created_at.desc())
+    posts = query.limit(limit).offset(skip).all()
+    if not posts:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="找不到相關關鍵字")
     return posts
 
 """新增貼文"""
