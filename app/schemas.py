@@ -1,4 +1,4 @@
-from pydantic import BaseModel,EmailStr, field_validator
+from pydantic import BaseModel,EmailStr, field_validator,Field
 from datetime import datetime
 from typing import Optional
 
@@ -26,6 +26,13 @@ class Post(PostBase):
     class Config:
         from_attributes = True # 讓 Pydantic 能從 ORM 模型中讀取資料
 
+
+class PostOut(BaseModel):
+    Post: Post
+    votes:int
+    class Config:
+        from_attributes = True
+
 class UserCreate(BaseModel):
     email:EmailStr # EmailStr 自動驗證格式是不是email
     password:str
@@ -44,3 +51,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id:Optional[int] = None
+
+class Vote(BaseModel):
+    post_id:int
+    dir: int = Field(le=1, description="投票動作，0=取消或不按讚、1=按讚")

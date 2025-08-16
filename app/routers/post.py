@@ -1,26 +1,29 @@
 from fastapi import FastAPI,Response,status,HTTPException,Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from sqlalchemy import case,or_,and_
+from sqlalchemy import case,or_,and_,func
 from typing import List,Optional
 from .. import models,schemas,oauth2
 
 router = APIRouter(prefix = "/posts",tags = ["posts"])
 
 """取得所有貼文"""
-@router.get("/",response_model = List[schemas.Post]) 
+@router.get("/",response_model = List[schemas.PostOut]) 
 def get_posts(db:Session = Depends(get_db),current_user:models.User = Depends(oauth2.get_current_user),
               limit:int = 100,skip:int = 0,search:Optional[str] = ""):
-    query = db.query(models.Post)
+    
+    query = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(
+            models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(models.Post.id)
+    
     title_match = models.Post.title.contains(search)
     content_match = models.Post.content.contains(search)
-
+    votes = func.count(models.Vote.post_id).desc()
     if search:
         contains =  or_(title_match, content_match)
         sort = case((and_(title_match, content_match), 1),(title_match, 2),(content_match, 3),else_=4)
-        query = query.filter(contains).order_by(sort,models.Post.created_at.desc())
+        query = query.filter(contains).order_by(sort,votes,models.Post.created_at.desc())
     else:
-        query = query.order_by(models.Post.created_at.desc())
+        query = query.order_by(votes,models.Post.created_at.desc())
     posts = query.limit(limit).offset(skip).all()
     if not posts:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="找不到相關關鍵字")
@@ -36,18 +39,22 @@ def create_posts(post:schemas.PostCreate,db:Session = Depends(get_db),current_us
     return new_post 
 
 """取得最新一則貼文"""
-@router.get("/latest",response_model = schemas.Post) 
+@router.get("/latest",response_model = schemas.PostOut) 
 def get_latest_post(db:Session = Depends(get_db),current_user:models.User = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
+    post = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(
+            models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(models.Post.id
+            ).order_by(models.Post.created_at.desc()).first()
     if not post: 
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
                             detail = "沒有最新貼文") 
     return post
 
 """根據ID取得貼文"""
-@router.get("/{id}",response_model = schemas.Post)
+@router.get("/{id}",response_model = schemas.PostOut)
 def get_post(id: int,db:Session = Depends(get_db),current_user:models.User = Depends(oauth2.get_current_user)): 
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    post = db.query(models.Post,func.count(models.Vote.post_id).label("votes")).join(
+            models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(models.Post.id
+            ).filter(models.Post.id == id).first()
     if not post: 
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
                             detail = f"Post with id: {id} was not found.") 

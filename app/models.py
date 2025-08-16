@@ -22,3 +22,12 @@ class User(Base):
     password = Column(String,nullable = False)
     created_at = Column(TIMESTAMP(timezone = True),nullable = False,server_default = text("now()")) # 資料庫自帶預設值建立時間
     
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False)
