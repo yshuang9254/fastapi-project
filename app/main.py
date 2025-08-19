@@ -6,7 +6,7 @@ from .routers import post,user,auth,vote
 from .config import settings
 
 # 建立資料庫表格（若表格不存在）
-# models.Base.metadata.create_all(bind = engine) 
+models.Base.metadata.create_all(bind = engine) 
 
 app = FastAPI()
 
