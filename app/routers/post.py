@@ -57,7 +57,7 @@ def get_post(id: int,db:Session = Depends(get_db),current_user:models.User = Dep
             ).filter(models.Post.id == id).first()
     if not post: 
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
-                            detail = f"Post with id: {id} was not found.") 
+                            detail = f"id為{id}的貼文不存在。") 
     return post
 
 """刪除指定ID的貼文"""
@@ -67,7 +67,7 @@ def delete_post(id:int,db:Session = Depends(get_db),current_user:models.User = D
     post = post_query.first()
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail = f"Post with id: {id} is  not exist.")
+                            detail = f"id為{id}的貼文不存在。")
     if post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail = "Not authorized to perform requested action.")
@@ -81,7 +81,7 @@ def update_post(id:int,post:schemas.PostCreate,db:Session = Depends(get_db),curr
     post_query = db.query(models.Post).filter(models.Post.id == id)
     if post_query.first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail = f"Post with id: {id} is  not exist.")
+                            detail = f"id為{id}的貼文不存在。")
     if post_query.first().owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail = "Not authorized to perform requested action.")
