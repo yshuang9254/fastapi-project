@@ -91,6 +91,9 @@ jobs:
     - name: Login to Heroku
       run: echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token  
 
+    - name: Set Heroku git remote
+      run: heroku git:remote -a ${{ secrets.HEROKU_APP_NAME }}
+
     - name: Deploy to Heroku
       uses: AkhileshNS/heroku-deploy@v3.14.15
 
