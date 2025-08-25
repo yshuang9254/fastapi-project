@@ -81,11 +81,11 @@ jobs:
       name: production
     needs: build
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
-
+    - name: Install Heroku CLI
+      run: curl https://cli-assets.heroku.com/install.sh | sh    
     - name: Deploy to Heroku
       uses: AkhileshNS/heroku-deploy@v3.14.15
       with:
