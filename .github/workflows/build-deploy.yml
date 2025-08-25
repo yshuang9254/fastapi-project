@@ -84,10 +84,16 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
+
     - name: Install Heroku CLI
-      run: curl https://cli-assets.heroku.com/install.sh | sh    
+      run: curl https://cli-assets.heroku.com/install.sh | sh 
+
+    - name: Login to Heroku
+      run: echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token  
+
     - name: Deploy to Heroku
       uses: AkhileshNS/heroku-deploy@v3.14.15
+
       with:
         heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
         heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
