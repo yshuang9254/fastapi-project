@@ -78,7 +78,7 @@ jobs:
   # Deploy (只在 build 成功後執行)
   deploy:
     environment:
-      name: production
+      name: deploy_production
     needs: build
     runs-on: ubuntu-latest
     steps:
