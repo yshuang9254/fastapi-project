@@ -5,7 +5,7 @@
 本專案是一個以 **FastAPI** 開發的 RESTful API，模擬社群平台的貼文與投票功能。
 自動產生 Swagger UI 文件。
 ### 相關連結
-- **api.md:**[查看 API 文件](docs/api.md)
+- **api.md:** [查看 API 文件](docs/api.md)
 - **Swagger UI:** [https://yushans-fastapi-project-a3a1db9af76e.herokuapp.com/docs#/](https://yushans-fastapi-project-a3a1db9af76e.herokuapp.com/docs#/)  
 - **ReDoc:** [https://yushans-fastapi-project-a3a1db9af76e.herokuapp.com/redoc](https://yushans-fastapi-project-a3a1db9af76e.herokuapp.com/redoc)  
 - **OpenAPI JSON:** [https://yushans-fastapi-project-a3a1db9af76e.herokuapp.com/openapi.json](https://yushans-fastapi-project-a3a1db9af76e.herokuapp.com/openapi.json)  
