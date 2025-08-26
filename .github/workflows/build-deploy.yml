@@ -89,9 +89,6 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Set Heroku stack to container
-        run: heroku stack:set container --app ${{ secrets.HEROKU_APP_NAME }}
-
       - name: Deploy to Heroku (Docker mode)
         uses: AkhileshNS/heroku-deploy@v3.14.15
         with:
