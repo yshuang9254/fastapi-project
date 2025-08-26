@@ -4,6 +4,6 @@ venv/
 .env
 __pycache__/
 *.pyc
-
+.env.test
 # 不要忽略 .gitignore 自己
 !.gitignore

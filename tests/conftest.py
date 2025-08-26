@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
-from app import models,database,schemas
+from app import models,schemas,database
 from .database import TestingSessionlocal,engine
 from app.oauth2 import create_access_token
 import pytest

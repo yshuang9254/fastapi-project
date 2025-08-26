@@ -5,8 +5,9 @@ from .config import settings
 
 
 # PostgreSQL 資料庫連線
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
-engine = create_engine(SQLALCHEMY_DATABASE_URL) 
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}?sslmode=require"
+engine = create_engine(SQLALCHEMY_DATABASE_URL,
+    connect_args={"sslmode": "require"}) 
 # 建立 Session 類別，用來與資料庫互動
 Sessionlocal = sessionmaker(autocommit = False,autoflush = False,bind = engine)
 # 建立 Base 為所有 ORM 類別的父類別，宣告資料表結構用
